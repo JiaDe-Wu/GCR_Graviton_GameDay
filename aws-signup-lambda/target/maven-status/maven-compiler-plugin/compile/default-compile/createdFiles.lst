@@ -1,0 +1,6 @@
+com/sample/app/lambda/UserAccount.class
+com/sample/app/lambda/Response.class
+com/sample/app/lambda/Request.class
+com/sample/app/lambda/Event.class
+com/sample/app/lambda/UserAttributes.class
+com/sample/app/lambda/signupHandler.class

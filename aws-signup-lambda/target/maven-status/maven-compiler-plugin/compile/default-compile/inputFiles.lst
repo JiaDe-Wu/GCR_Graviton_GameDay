@@ -1,0 +1,6 @@
+/Users/wjiad/code/replatform-java-webapp-on-aws/aws-signup-lambda/src/main/java/com/sample/app/lambda/Request.java
+/Users/wjiad/code/replatform-java-webapp-on-aws/aws-signup-lambda/src/main/java/com/sample/app/lambda/signupHandler.java
+/Users/wjiad/code/replatform-java-webapp-on-aws/aws-signup-lambda/src/main/java/com/sample/app/lambda/UserAttributes.java
+/Users/wjiad/code/replatform-java-webapp-on-aws/aws-signup-lambda/src/main/java/com/sample/app/lambda/Response.java
+/Users/wjiad/code/replatform-java-webapp-on-aws/aws-signup-lambda/src/main/java/com/sample/app/lambda/Event.java
+/Users/wjiad/code/replatform-java-webapp-on-aws/aws-signup-lambda/src/main/java/com/sample/app/lambda/UserAccount.java
