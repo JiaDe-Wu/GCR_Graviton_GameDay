@@ -1,0 +1,766 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  This template deploys a multi-AZ MySQL database instance in the private subnet.
+
+  **WARNING** You will be billed for the AWS resources created if you create a stack from this template.
+
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: MIT-0
+  
+########################################################################
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: ''
+  CreateUserLambdaKey:
+    Type: String
+    Description: 'The create user lambda function'
+    Default: 'lib/create-user-lambda-1.0.jar' 
+  KeyPairName:
+    Description: Public/private key pairs allow you to securely connect to your instance
+      after it launches
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: ''
+  DBMasterUserPassword:
+    Type: String
+  DBMasterUsername:
+    Default: admin
+    Type: String
+  AppPassword:
+    Type: String
+  AppUsername:
+    Default: admin
+    Type: String
+  MySQLversion:
+    AllowedValues:
+    - '8.0.23'
+    - '5.7.38'
+    - '8.0.28'    
+    Default: '8.0.23'
+    Description: MySQL Version 
+    Type: String
+  Redisversion:
+    AllowedValues:
+    - '6.0.9'
+    - '7.0.4'
+    - '6.2.7'    
+    Default: '6.0.9'
+    Description: Redis Version 
+    Type: String
+  MySQLEBSType:
+    AllowedValues:
+    - gp2
+    - io2
+    - gp3
+    - io1
+    - st1
+    ConstraintDescription: Choose an EBS type. SSD(gp2) or larger recommended.// In this template, Maximum 1023 ，if you choose the piops type, we will define 3000 IOPs for you 
+    Default: gp2
+    Description: MySQL server EBS type
+    Type: String
+  MySQLEBSSize:
+    MaxValue: '1023'
+    MinValue: '10'
+    ConstraintDescription: Choose an EBS Size.
+    Default: '50'
+    Description: MySQL server EBS Size
+    Type: Number
+  RedisEBSType:
+    AllowedValues:
+    - gp2
+    - io2
+    - gp3
+    - io1
+    - st1
+    ConstraintDescription: Choose an EBS type. SSD(gp2) or larger recommended.// In this template, Maximum 1023 ，if you choose the piops type, we will define 3000 IOPs for you 
+    Default: gp2
+    Description: Redis server EBS type
+    Type: String
+  RedisEBSSize:
+    MaxValue: '1023'
+    MinValue: '10'
+    ConstraintDescription: Choose an EBS Size.
+    Default: '50'
+    Description: Redis server EBS Size
+    Type: Number
+  BastionEBSType:
+    AllowedValues:
+    - gp2
+    - io2
+    - gp3
+    - io1
+    - st1
+    ConstraintDescription: Choose an EBS type. SSD(gp2) or larger recommended.// In this template, Maximum 1023 ，if you choose the piops type, we will define 3000 IOPs for you 
+    Default: gp2
+    Description: Bastion server EBS type
+    Type: String
+  BastionEBSSize:
+    MaxValue: '1023'
+    MinValue: '10'
+    ConstraintDescription: Choose an EBS Size.
+    Default: '50'
+    Description: Bastion server EBS Size
+    Type: Number
+  VPCID:
+    Description: VPC ID
+    Default: vpc-0d3a937e7cfd0af62
+    Type: AWS::EC2::VPC::Id
+  AccessCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
+    Description: 'The CIDR IP range that is permitted to access MySQL instances.
+      Note: a value of 0.0.0.0/0 will allow access from ANY ip address'
+    Default: 0.0.0.0/0
+    Type: String
+  DBServerSecurityGroup:
+    Description: DB Server Security Group
+    Default: sg-0efa70beb49412dd2
+    Type: AWS::EC2::SecurityGroup::Id
+  BastionServerSecurityGroup:
+    Description: DB Server Security Group
+    Default: sg-0efa70beb49412dd2
+    Type: AWS::EC2::SecurityGroup::Id
+  PrivateSubnet1ID:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-0162b33c206202d38
+  PrivateSubnet2ID:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-062a0fb910c3ce230
+  PublicSubnet1ID:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-0162b33c206202d38
+  PublicSubnet2ID:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-062a0fb910c3ce230
+
+
+  DBServerInstanceType:
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - i3.large
+      - i3.xlarge
+      - i3.2xlarge
+      - i3.4xlarge
+      - i3.8xlarge
+    Default: m5.large
+    Description: MySQL server instance type
+    Type: String
+  RedisServerInstanceType:
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - i3.large
+      - i3.xlarge
+      - i3.2xlarge
+      - i3.4xlarge
+      - i3.8xlarge
+    Default: m5.large
+    Description: Redis server instance type
+    Type: String
+
+  BastionServerInstanceType:
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - i3.large
+      - i3.xlarge
+      - i3.2xlarge
+      - i3.4xlarge
+      - i3.8xlarge
+    Default: c5.large
+    Description: Redis server instance type
+    Type: String
+  AWSInternalSecurityPolicy:
+    Default: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+    Type: String
+
+Mappings:
+  AWSRegion2AMI:
+    ap-northeast-1:
+      HVM86: ami-0ca38c7440de1749a
+    ap-northeast-2:
+      HVM86: ami-0f2c95e9fe3f8f80e
+    ap-southeast-1:
+      HVM86: ami-02f26adf094f51167
+    ap-southeast-2:
+      HVM86: ami-0186908e2fdeea8f3
+    eu-central-1:
+      HVM86: ami-043097594a7df80ec
+    sa-east-1:
+      HVM86: ami-05373777d08895384
+    us-east-1:
+      HVM86: ami-0d5eff06f840b45e9
+    us-east-2:
+      HVM86: ami-077e31c4939f6a2f3
+    us-west-1:
+      HVM86: ami-04468e03c37242e1e
+    us-west-2:
+      HVM86: ami-0cf6f5c8a62fa5da6
+
+Resources:
+  MySQLMainLogGroup:
+    Type: AWS::Logs::LogGroup
+  MySQLIamInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Ref AWSInternalSecurityPolicy
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${MySQLMainLogGroup}:*
+          - Effect: Allow
+            Action: 'ec2:Describe*'
+            Resource: '*'
+        PolicyName: MySQL-Instance-Role
+  MySQLIamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref MySQLIamInstanceRole
+  MySQL1InstanceWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  MySQL1InstanceWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: MySQL1Instance
+    Properties:
+      Handle: !Ref MySQL1InstanceWaitHandle
+      Timeout: '6000'
+  MySQL1Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      Comment: Install a MySQL on aws
+      AWS::CloudFormation::Init:
+        config:
+          awscli:
+            commands:
+              00_set_default_s3_signature_version:
+                command: aws configure set default.s3.signature_version s3v4
+              01_set_default_region:
+                command: !Sub "aws configure set default.region '${AWS::Region}'"
+          packages:
+            yum:
+              awslogs: []
+          files:
+            /etc/awslogs/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file= /var/log/agent-state
+                [/home/ec2-user/misc/install]
+                file = /var/log/cloud-init-output.log
+                log_group_name = ${MySQLMainLogGroup}
+                log_stream_name = {instance_id}/MySQL/install.log
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/awslogs/awscli.conf:
+              content: !Sub |
+                [plugins]
+                cwlogs = cwlogs
+                [default]
+                region = ${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /tmp/params.txt:
+              content:
+                !Sub |
+                  DBMasterUserPassword|${DBMasterUserPassword}
+                  DBMasterUsername|${DBMasterUsername}
+                  BucketName|${BucketName}
+                  MySQLversion|${MySQLversion}
+                  AppUsername|${AppUsername}
+                  AppPassword|${AppPassword}
+              mode: '000440'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/cfn/cfn-hup.conf
+                - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+              awslogs:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/awslogs/awslogs.conf
+                packages:
+                  yum:
+                  - awslogs
+    Properties:
+      KeyName: !Ref KeyPairName
+      IamInstanceProfile: !Ref MySQLIamInstanceProfile
+      ImageId: !FindInMap [AWSRegion2AMI, !Ref 'AWS::Region', HVM86]
+      InstanceType: !Ref DBServerInstanceType
+      SubnetId: !Ref PrivateSubnet1ID
+      SecurityGroupIds:
+      - !Ref DBServerSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: !Ref 'MySQLEBSSize'
+            VolumeType: !Ref 'MySQLEBSType'
+      UserData:
+        !Base64
+          Fn::Sub: |
+            #!/bin/bash
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MySQL1Instance  --region ${AWS::Region}
+            curl -o install-mysql.sh https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/install-mysql.sh
+            chmod a+x install-mysql.sh
+            ./install-mysql.sh
+            /opt/aws/bin/cfn-signal -e $? -d "`cat /home/ec2-user/outputurl`" -r "Build Process Complete" '${MySQL1InstanceWaitHandle}'
+      Tags:
+      - Key: Name
+        Value: Graviton_GameDay_MySQL1
+
+  RedisMainLogGroup:
+    Type: AWS::Logs::LogGroup
+  RedisIamInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Ref AWSInternalSecurityPolicy
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${RedisMainLogGroup}:*
+          - Effect: Allow
+            Action: 'ec2:Describe*'
+            Resource: '*'
+        PolicyName: Redis-Instance-Role
+  RedisIamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref RedisIamInstanceRole
+  Redis1InstanceWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  Redis1InstanceWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: Redis1Instance
+    Properties:
+      Handle: !Ref Redis1InstanceWaitHandle
+      Timeout: '6000'
+  Redis1Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      Comment: Install a Redis on aws
+      AWS::CloudFormation::Init:
+        config:
+          awscli:
+            commands:
+              00_set_default_s3_signature_version:
+                command: aws configure set default.s3.signature_version s3v4
+              01_set_default_region:
+                command: !Sub "aws configure set default.region '${AWS::Region}'"
+          packages:
+            yum:
+              awslogs: []
+          files:
+            /etc/awslogs/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file= /var/log/agent-state
+                [/home/ec2-user/misc/install]
+                file = /var/log/cloud-init-output.log
+                log_group_name = ${RedisMainLogGroup}
+                log_stream_name = {instance_id}/Redis/install.log
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/awslogs/awscli.conf:
+              content: !Sub |
+                [plugins]
+                cwlogs = cwlogs
+                [default]
+                region = ${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /tmp/params.txt:
+              content:
+                !Sub |
+                  Redisversion|${Redisversion}
+              mode: '000440'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/cfn/cfn-hup.conf
+                - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+              awslogs:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/awslogs/awslogs.conf
+                packages:
+                  yum:
+                  - awslogs
+    Properties:
+      KeyName: !Ref KeyPairName
+      IamInstanceProfile: !Ref RedisIamInstanceProfile
+      ImageId: !FindInMap [AWSRegion2AMI, !Ref 'AWS::Region', HVM86]
+      InstanceType: !Ref RedisServerInstanceType
+      SubnetId: !Ref PrivateSubnet1ID
+      SecurityGroupIds:
+      - !Ref DBServerSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: !Ref 'RedisEBSSize'
+            VolumeType: !Ref 'RedisEBSType'
+      UserData:
+        !Base64
+          Fn::Sub: |
+            #!/bin/bash
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Redis1Instance  --region ${AWS::Region}
+            curl -o install-redis.sh https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/install-redis.sh
+            chmod a+x install-redis.sh
+            ./install-redis.sh 
+            /opt/aws/bin/cfn-signal -e $? -d "`cat /home/ec2-user/outputurl`" -r "Build Process Complete" '${Redis1InstanceWaitHandle}'
+      Tags:
+      - Key: Name
+        Value: Graviton_GameDay_Redis1
+
+  BastionMainLogGroup:
+      Type: AWS::Logs::LogGroup
+  BastionIamInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Ref AWSInternalSecurityPolicy
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
+          - Effect: Allow
+            Action: 's3:*'
+            Resource: '*'
+          - Effect: Allow
+            Action: 'ec2:Describe*'
+            Resource: '*'
+        PolicyName: Bastion-Instance-Role
+  BastionIamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref BastionIamInstanceRole
+  BastionInstanceWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  BastionInstanceWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: BastionInstance
+    Properties:
+      Handle: !Ref BastionInstanceWaitHandle
+      Timeout: '6000'
+  BastionInstance:
+    DependsOn: 
+      - Redis1Instance
+      - MySQL1Instance
+    Type: AWS::EC2::Instance
+    Metadata:
+      Comment: Install a Bastion on aws
+      AWS::CloudFormation::Init:
+        config:
+          awscli:
+            commands:
+              00_set_default_s3_signature_version:
+                command: aws configure set default.s3.signature_version s3v4
+              01_set_default_region:
+                command: !Sub "aws configure set default.region '${AWS::Region}'"
+          packages:
+            yum:
+              awslogs: []
+          files:
+            /etc/awslogs/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file= /var/log/agent-state
+                [/home/ec2-user/misc/install]
+                file = /var/log/cloud-init-output.log
+                log_group_name = ${BastionMainLogGroup}
+                log_stream_name = {instance_id}/Bastion/install.log
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/awslogs/awscli.conf:
+              content: !Sub |
+                [plugins]
+                cwlogs = cwlogs
+                [default]
+                region = ${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /tmp/params.txt:
+              content:
+                !Sub |
+                  DBMasterUserPassword|${DBMasterUserPassword}
+                  DBMasterUsername|${DBMasterUsername}
+                  BucketName|${BucketName}
+                  KeyPairName|${KeyPairName}
+              mode: '000440'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/cfn/cfn-hup.conf
+                - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+              awslogs:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/awslogs/awslogs.conf
+                packages:
+                  yum:
+                  - awslogs
+    Properties:
+      KeyName: !Ref KeyPairName
+      IamInstanceProfile: !Ref BastionIamInstanceProfile
+      ImageId: !FindInMap [AWSRegion2AMI, !Ref 'AWS::Region', HVM86]
+      InstanceType: !Ref BastionServerInstanceType
+      SubnetId: !Ref PublicSubnet1ID
+      SecurityGroupIds:
+      - !Ref BastionServerSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: !Ref 'BastionEBSSize'
+            VolumeType: !Ref 'BastionEBSType'
+      UserData:
+        !Base64
+          Fn::Sub: |
+            #!/bin/bash
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource BastionInstance  --region ${AWS::Region}
+            curl -o install-bastion.sh https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/install-bastion.sh
+            chmod a+x install-bastion.sh
+            ./install-bastion.sh
+            /opt/aws/bin/cfn-signal -e $? -d "`cat /home/ec2-user/outputurl`" -r "Build Process Complete" '${BastionInstanceWaitHandle}'
+      Tags:
+      - Key: Name
+        Value: Graviton_GameDay_Bastion
+
+
+  # # IAM Role for sign up lambda function
+  # SignupLambdaRole:
+  #   Type: 'AWS::IAM::Role'
+  #   Properties:
+  #     RoleName: !Sub 'Lambda-Role-${AWS::StackName}'
+  #     Path: /
+  #     AssumeRolePolicyDocument:
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service:
+  #               - lambda.amazonaws.com
+  #           Action:
+  #             - 'sts:AssumeRole'
+  #     ManagedPolicyArns:
+  #       - 'arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess'
+  #       - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+  #       - 'arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole'
+
+  # # Sign up lambda function
+
+
+  # SignupLambda:
+  #   DependsOn: 
+  #     - SignupLambdaRole
+  #     - BastionInstance
+  #   Type: 'AWS::Lambda::Function'
+  #   Properties:
+  #     FunctionName: cognito-signup-lambda
+  #     Code:
+  #       S3Bucket: !Ref BucketName
+  #       S3Key: !Ref CreateUserLambdaKey
+  #     Handler: 'com.sample.app.lambda.signupHandler::handleRequest'
+  #     MemorySize: 512
+  #     Role: !GetAtt SignupLambdaRole.Arn
+  #     Runtime: java11
+  #     Timeout: 15
+  #     VpcConfig:
+  #       SecurityGroupIds:
+  #       - !Ref DBServerSecurityGroup
+  #       SubnetIds:
+  #         - !Ref PrivateSubnet1ID
+  #         - !Ref PrivateSubnet2ID
+  
+  # # Cognito user pool
+  # CognitoUserPool:
+  #   DependsOn: SignupLambda
+  #   Type: 'AWS::Cognito::UserPool'
+  #   Properties:
+  #     AutoVerifiedAttributes:
+  #       - email
+  #     UsernameAttributes:
+  #       - email
+  #     LambdaConfig:
+  #       PostConfirmation: !GetAtt SignupLambda.Arn
+  #     UserPoolName: graviton-gameday-pool
+  #     VerificationMessageTemplate:
+  #       DefaultEmailOption: CONFIRM_WITH_CODE
+
+  # # Permission for Cognito to execute function
+  # SignupLambdaPermission:
+  #   DependsOn: CognitoUserPool
+  #   Type: 'AWS::Lambda::Permission'
+  #   Properties:
+  #     Action: lambda:InvokeFunction
+  #     FunctionName: cognito-signup-lambda
+  #     Principal: cognito-idp.amazonaws.com
+  #     SourceArn: !GetAtt CognitoUserPool.Arn
+# Export stack output parameters 
+Outputs:
+  MySQLEndpoint:
+    Description: A reference to the MySQL DB instance endpoint
+    Value: !GetAtt MySQL1Instance.PrivateDnsName
+
+  RedisEndpoint:
+    Description: A reference to the Redis DB instance endpoint
+    Value: !GetAtt Redis1Instance.PrivateDnsName
+
+  BastionEndpoint:
+    Description: A reference to the Bastion instance endpoint
+    Value: !GetAtt BastionInstance.PublicDnsName
+
+  # UserPoolId:
+  #   Description: generated ID for this UserPool
+  #   Value: !Ref CognitoUserPool
+
+
+
+...

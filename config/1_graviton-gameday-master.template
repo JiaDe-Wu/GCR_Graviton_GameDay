@@ -1,0 +1,517 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  This template deploys the solution components for the re-platformed java solution.
+  The deployed resources include a bastion host, external & internal load balancers, 
+  launch templates & autoscaling groups for the web and app instances, a Redis cache 
+  cluster, a Cognito user pool, and a post sign up Lambda function
+
+  **WARNING** You will be billed for the AWS resources created if you create a stack from this template.
+
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: MIT-0
+  
+########################################################################
+
+Metadata:
+  LICENSE: Apache License Version 2.0
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: admin Configuration
+      Parameters:
+      - KeyPairName
+      - AvailabilityZones
+      - AppPassword
+      - AppUsername
+      - DBMasterUsername
+      - DBMasterUserPassword
+      - MySQLversion
+      - Redisversion
+
+Parameters:
+  # General
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+    Default: graviton-gameday
+
+  KeyPairName:
+    Description: Public/private key pairs allow you to securely connect to your instance
+      after it launches
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: ''
+
+  CallbackURL:
+    Type: String
+    Description: 'Callback URL to your web application (If you do not use cloudfront just fill in ito therwise please ignore)'
+    Default: 'https://<your domain>/<application root>/j_security_check'
+
+  CreateUserLambdaKey:
+    Type: String
+    Description: 'The create user lambda function'
+    Default: 'lib/create-user-lambda-1.0.jar' 
+
+  VPCCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 10.0.0.0/16
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
+      The logical order is preserved AdminServer2 AZs are used for this deploymentAdminServer'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+  PublicSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.0.0/24
+
+  PublicSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
+    Type: String
+    Default: 10.0.1.0/24
+
+  PrivateSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the web app private subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.2.0/23
+
+  PrivateSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the web app private subnet in the second Availability Zone
+    Type: String
+    Default: 10.0.4.0/23
+
+  PrivateSubnet3CIDR:
+    Description: Please enter the IP range (CIDR notation) for the database private subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.6.0/23
+
+  PrivateSubnet4CIDR:
+    Description: Please enter the IP range (CIDR notation) for the database private subnet in the second Availability Zone
+    Type: String
+    Default: 10.0.8.0/23
+
+  WebALBSGSource:
+    Description: The IP address range that can be used to access the web app
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 0.0.0.0/0
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  BastionSGSource:
+    Description: The IP address range that can be used to access the Bastion Host
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 0.0.0.0/0
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  BastionServerInstanceType:
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - i3.large
+      - i3.xlarge
+      - i3.2xlarge
+      - i3.4xlarge
+      - i3.8xlarge
+    Default: c5.large
+    Description: Redis server instance type
+    Type: String
+  AWSInternalSecurityPolicy:
+    Default: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+    Type: String
+
+  BastionEBSType:
+    AllowedValues:
+    - gp2
+    - io2
+    - gp3
+    - io1
+    - st1
+    ConstraintDescription: Choose an EBS type. SSD(gp2) or larger recommended.// In this template, Maximum 1023 ，if you choose the piops type, we will define 3000 IOPs for you 
+    Default: gp2
+    Description: Bastion server EBS type
+    Type: String
+  BastionEBSSize:
+    MaxValue: '1023'
+    MinValue: '10'
+    ConstraintDescription: Choose an EBS Size.
+    Default: '50'
+    Description: Bastion server EBS Size
+    Type: Number
+  DBServerInstanceType:
+    Description: Default EC2 instance type for the DBServer instance.
+    Type: String
+    Default: r5.large
+    AllowedValues:
+    - t2.large
+    - t2.xlarge
+    - t2.2xlarge
+    - t3.small
+    - t3.medium
+    - t3.large
+    - t3.xlarge
+    - t3.2xlarge
+    - m3.medium
+    - m3.large
+    - m3.xlarge
+    - m3.2xlarge
+    - m4.large
+    - m4.xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m5.large
+    - m5.xlarge
+    - m5.2xlarge
+    - m5.4xlarge
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c5.large
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - i3.xlarge
+    - i3.2xlarge
+    - i3.4xlarge
+    - i3.8xlarge
+    - r3.xlarge
+    - r3.2xlarge
+    - r3.4xlarge
+    - r4.large
+    - r4.xlarge
+    - r4.2xlarge
+    - r4.4xlarge
+    - r5.large
+    - r5.xlarge
+    - r5.2xlarge
+    - r5.4xlarge
+
+  RedisServerInstanceType:
+    Description: Default EC2 instance type for the RedisServer instance.
+    Type: String
+    Default: r5.large
+    AllowedValues:
+    - t2.large
+    - t2.xlarge
+    - t2.2xlarge
+    - t3.small
+    - t3.medium
+    - t3.large
+    - t3.xlarge
+    - t3.2xlarge
+    - m3.medium
+    - m3.large
+    - m3.xlarge
+    - m3.2xlarge
+    - m4.large
+    - m4.xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m5.large
+    - m5.xlarge
+    - m5.2xlarge
+    - m5.4xlarge
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c5.large
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - i3.xlarge
+    - i3.2xlarge
+    - i3.4xlarge
+    - i3.8xlarge
+    - r3.xlarge
+    - r3.2xlarge
+    - r3.4xlarge
+    - r4.large
+    - r4.xlarge
+    - r4.2xlarge
+    - r4.4xlarge
+    - r5.large
+    - r5.xlarge
+    - r5.2xlarge
+    - r5.4xlarge
+
+  APPServerInstanceType:
+    Description: Default EC2 instance type for the AppServer instance.
+    Type: String
+    Default: m5.large
+    AllowedValues:
+    - t2.large
+    - t2.xlarge
+    - t2.2xlarge
+    - t3.small
+    - t3.medium
+    - t3.large
+    - t3.xlarge
+    - t3.2xlarge
+    - m3.medium
+    - m3.large
+    - m3.xlarge
+    - m3.2xlarge
+    - m4.large
+    - m4.xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m5.large
+    - m5.xlarge
+    - m5.2xlarge
+    - m5.4xlarge
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c5.large
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - i3.xlarge
+    - i3.2xlarge
+    - i3.4xlarge
+    - i3.8xlarge
+    - r3.xlarge
+    - r3.2xlarge
+    - r3.4xlarge
+    - r4.large
+    - r4.xlarge
+    - r4.2xlarge
+    - r4.4xlarge
+    - r5.large
+    - r5.xlarge
+    - r5.2xlarge
+    - r5.4xlarge
+  AppPassword:
+    Type: String
+    Default: admin
+  AppUsername:
+    Default: admin
+    Type: String
+  DBMasterUserPassword:
+    Default: GravitonGameDay@2022
+    Description: The database admin account password. Must be at least 8 characters containing letters, numbers and symbols. It can be any printable ASCII character except /, double quotes, or @.
+    MaxLength: '32'
+    MinLength: '8'
+    NoEcho: 'True'
+    Type: String
+  DBMasterUsername:
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+    Default: graviton
+    Description: The database admin account username
+    MaxLength: '16'
+    MinLength: '1'
+    Type: String
+
+  MySQLversion:
+    AllowedValues:
+    - '8.0.23'
+    - '5.7.38'
+    - '8.0.28'    
+    Default: '8.0.23'
+    Description: MySQL Version 
+    Type: String
+  Redisversion:
+    AllowedValues:
+    - '6.0.9'
+    - '7.0.4'
+    - '6.2.7'    
+    Default: '6.0.9'
+    Description: Redis Version 
+    Type: String
+  MySQLEBSType:
+    AllowedValues:
+    - gp2
+    - io2
+    - gp3
+    - io1
+    - st1
+    ConstraintDescription: Choose an EBS type. SSD(gp2) or larger recommended.// In this template, Maximum 1023 ，if you choose the piops type, we will define 3000 IOPs for you 
+    Default: gp2
+    Description: MySQL server EBS type
+    Type: String
+  MySQLEBSSize:
+    MaxValue: '1023'
+    MinValue: '10'
+    ConstraintDescription: Choose an EBS Size.
+    Default: '50'
+    Description: MySQL server EBS Size
+    Type: Number
+  RedisEBSType:
+    AllowedValues:
+    - gp2
+    - io2
+    - gp3
+    - io1
+    - st1
+    ConstraintDescription: Choose an EBS type. SSD(gp2) or larger recommended.// In this template, Maximum 1023 ，if you choose the piops type, we will define 3000 IOPs for you 
+    Default: gp2
+    Description: Redis server EBS type
+    Type: String
+  RedisEBSSize:
+    MaxValue: '1023'
+    MinValue: '10'
+    ConstraintDescription: Choose an EBS Size.
+    Default: '50'
+    Description: Redis server EBS Size
+    Type: Number
+  APPEBSType:
+    AllowedValues:
+    - gp2
+    - io2
+    - gp3
+    - io1
+    - st1
+    ConstraintDescription: Choose an EBS type. SSD(gp2) or larger recommended.// In this template, Maximum 1023 ，if you choose the piops type, we will define 3000 IOPs for you 
+    Default: gp2
+    Description: APP server EBS type
+    Type: String
+  APPEBSSize:
+    MaxValue: '1023'
+    MinValue: '10'
+    ConstraintDescription: Choose an EBS Size.
+    Default: '50'
+    Description: APP server EBS Size
+    Type: Number
+
+  AWSInternalSecurityPolicy:
+    Default: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+    Type: String
+
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/2_vpc.template
+      Parameters:
+        AvailabilityZones:
+          !Join
+          - ','
+          - !Ref AvailabilityZones
+        KeyPairName: !Ref KeyPairName
+        NumberOfAZs: '2'
+        PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
+        PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
+        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
+        PublicSubnet2CIDR: !Ref PublicSubnet2CIDR
+        VPCCIDR: !Ref VPCCIDR
+
+  SecurityGroupStack:
+    DependsOn: VPCStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/3_securitygroups.template
+      Parameters:
+        VPCID: !GetAtt VPCStack.Outputs.VPCID
+        VPCCIDR: !Ref VPCCIDR
+        AccessCIDR: !Ref WebALBSGSource
+        BastionSGSource: !Ref BastionSGSource
+
+  DBonEC2Stack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SecurityGroupStack
+    Properties:
+      TemplateURL: https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/4_db.template
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        DBServerSecurityGroup: !GetAtt SecurityGroupStack.Outputs.DBServerSecurityGroup
+        DBServerInstanceType: !Ref DBServerInstanceType
+        RedisServerInstanceType: !Ref RedisServerInstanceType
+        BastionServerInstanceType: !Ref BastionServerInstanceType
+        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
+        PrivateSubnet1ID: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+        PrivateSubnet2ID: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+        VPCID: !GetAtt VPCStack.Outputs.VPCID
+        MySQLversion: !Ref MySQLversion
+        Redisversion: !Ref Redisversion
+        DBMasterUserPassword: !Ref DBMasterUserPassword
+        DBMasterUsername: !Ref DBMasterUsername
+        AppPassword: !Ref AppPassword
+        AppUsername: !Ref AppUsername
+        AWSInternalSecurityPolicy: !Ref AWSInternalSecurityPolicy
+        MySQLEBSType: !Ref MySQLEBSType
+        MySQLEBSSize: !Ref MySQLEBSSize
+        RedisEBSType: !Ref RedisEBSType
+        RedisEBSSize: !Ref RedisEBSSize
+        BastionEBSType: !Ref BastionEBSType
+        BastionEBSSize: !Ref BastionEBSSize
+        BastionServerSecurityGroup: !GetAtt SecurityGroupStack.Outputs.BastionServerSecurityGroup
+        BucketName: !GetAtt SecurityGroupStack.Outputs.S3Bucket
+        CreateUserLambdaKey: !Ref CreateUserLambdaKey
+  APPonEC2Stack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: DBonEC2Stack
+    Properties:
+      TemplateURL: https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/5_app.template
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        APPServerInstanceType: !Ref APPServerInstanceType
+        PrivateSubnet1ID: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+        PrivateSubnet2ID: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
+        MySQLEndpoint: !GetAtt DBonEC2Stack.Outputs.MySQLEndpoint
+        RedisEndpoint: !GetAtt DBonEC2Stack.Outputs.RedisEndpoint
+        APPServerSecurityGroup: !GetAtt SecurityGroupStack.Outputs.APPServerSecurityGroup
+        WebServerSecurityGroup: !GetAtt SecurityGroupStack.Outputs.WebServerSecurityGroup
+        AWSInternalSecurityPolicy: !Ref AWSInternalSecurityPolicy
+        APPEBSType: !Ref APPEBSType
+        APPEBSSize: !Ref APPEBSSize
+        BucketName: !GetAtt SecurityGroupStack.Outputs.S3Bucket
+        DBMasterUsername: !Ref DBMasterUsername
+        DBMasterUserPassword: !Ref DBMasterUserPassword
+        VPCID: !GetAtt VPCStack.Outputs.VPCID
+
+
+
+Outputs:
+  CloudFrontDNS:
+    Description: The url of the cloudfront
+    Value: !GetAtt APPonEC2Stack.Outputs.CloudFrontDNS
+
+  WebEndpoint:
+    Description: A reference to the Web DB instance endpoint
+    Value: !GetAtt APPonEC2Stack.Outputs.WebEndpoint
+
+  AppEndpoint:
+    Description: A reference to the App DB instance endpoint
+    Value: !GetAtt APPonEC2Stack.Outputs.AppEndpoint
+  
+  MySQLEndpoint:
+    Description: A reference to the MySQL DB instance endpoint
+    Value: !GetAtt DBonEC2Stack.Outputs.MySQLEndpoint
+
+  RedisEndpoint:
+    Description: A reference to the Redis DB instance endpoint
+    Value: !GetAtt DBonEC2Stack.Outputs.RedisEndpoint
+    
+  BastionEndpoint:
+    Description: A reference to the MySQL DB instance endpoint
+    Value: !GetAtt DBonEC2Stack.Outputs.BastionEndpoint
+
+  #UserPoolId:
+    #Description: generated ID for this UserPool
+    #Value: !GetAtt DBonEC2Stack.Outputs.UserPoolId
+

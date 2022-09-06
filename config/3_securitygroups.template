@@ -1,0 +1,149 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description:  >-
+  This template deploys the infrastructure components for the re-platformed Java solution.
+  The deployed resources include a VPC, two public subnets, two app private subnets, two DB
+  private subnets, an internet gateway, two NAT gateways, public and private route tables. 
+  It also deploys an S3 bucket to store resource and configuration files.
+
+  **WARNING** You will be billed for the AWS resources created if you create a stack from this template.
+
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: MIT-0
+  
+########################################################################
+Parameters:
+  AccessCIDR:
+    ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
+    Description: 'The CIDR IP range that is permitted to access. Note: a value of
+      0.0.0.0/0 will allow access from ANY ip address'
+    Type: String
+  VPCID:
+    Description: VPC ID of your existing Virtual Private Cloud (VPC) where you want to depoy RDS.
+    Type: AWS::EC2::VPC::Id
+  VPCCIDR:
+    ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
+    Description: The CIDR block for VPC
+    Type: String
+  BastionSGSource:
+    ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
+    Description: 'The CIDR IP range that is permitted to access. Note: a value of
+      0.0.0.0/0 will allow access from ANY ip address'
+    Type: String
+Resources:
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access to Bastion and Redis Port
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref BastionSGSource
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+  DBServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access to MySQL and Redis Port
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref VPCCIDR
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        CidrIp: !Ref VPCCIDR
+      - IpProtocol: tcp
+        FromPort: 6379
+        ToPort: 6379
+        CidrIp: !Ref VPCCIDR
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+  APPServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: App Server Security Group 
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref VPCCIDR
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: !Ref VPCCIDR
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: !Ref VPCCIDR
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: !Ref VPCCIDR
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+  WebServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Enable HTTP access via port 80 and 443 to the allowed CIDR
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: !Ref AccessCIDR
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: !Ref AccessCIDR
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: !Ref AccessCIDR
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref VPCCIDR
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::AccountId}-graviton-game-day"
+      AccessControl: Private
+
+Outputs:
+  WebServerSecurityGroup:
+    Description: WebServe Security Group
+    Value: !Ref WebServerSecurityGroup
+  APPServerSecurityGroup:
+    Description: APP Server Security Group
+    Value: !Ref APPServerSecurityGroup
+  DBServerSecurityGroup:
+    Description: Elasticache Security Group
+    Value: !Ref DBServerSecurityGroup
+  BastionServerSecurityGroup:
+    Description: Bastion Security Group
+    Value: !Ref BastionSecurityGroup
+  S3Bucket:
+    Description: S3Bucket for game day
+    Value: !Ref S3Bucket
+

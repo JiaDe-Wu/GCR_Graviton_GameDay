@@ -1,0 +1,568 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  This template deploys a multi-AZ Web database instance in the private subnet.
+
+  **WARNING** You will be billed for the AWS resources created if you create a stack from this template.
+
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: MIT-0
+  
+########################################################################
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: ''
+  #  UserPoolId:
+  #  Type: String
+  #  Default: ''
+  KeyPairName:
+    Description: Public/private key pairs allow you to securely connect to your instance
+      after it launches
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: ''
+  MySQLEndpoint:
+    Type: String
+  RedisEndpoint:
+    Type: String
+  DBMasterUserPassword:
+    Type: String
+  DBMasterUsername:
+    Default: graviton
+    Type: String
+  APPEBSType:
+    AllowedValues:
+    - gp2
+    - io2
+    - gp3
+    - io1
+    - st1
+    ConstraintDescription: Choose an EBS type. SSD(gp2) or larger recommended.// In this template, Maximum 1023  if you choose the piops type, we will define 3000 IOPs for you 
+    Default: gp2
+    Description: App server EBS type
+    Type: String
+  APPEBSSize:
+    MaxValue: '1023'
+    MinValue: '10'
+    ConstraintDescription: Choose an EBS Size.
+    Default: '50'
+    Description: App server EBS Size
+    Type: Number
+  VPCID:
+    Description: VPC ID
+    Default: vpc-0d3a937e7cfd0af62
+    Type: AWS::EC2::VPC::Id
+  PrivateSubnet1ID:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-0162b33c206202d38
+  PrivateSubnet2ID:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-062a0fb910c3ce230
+  PublicSubnet1ID:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-0162b33c206202d38
+  PublicSubnet2ID:
+    Type: AWS::EC2::Subnet::Id
+  WebServerSecurityGroup:
+    Default: sg-0efa70beb49412dd2
+    Type: AWS::EC2::SecurityGroup::Id
+  APPServerSecurityGroup:
+    Default: sg-0efa70beb49412dd2
+    Type: AWS::EC2::SecurityGroup::Id
+  WebServerInstanceType:
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - i3.large
+      - i3.xlarge
+      - i3.2xlarge
+      - i3.4xlarge
+      - i3.8xlarge
+    Default: m5.large
+    Description: Web server instance type
+    Type: String
+  APPServerInstanceType:
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - i3.large
+      - i3.xlarge
+      - i3.2xlarge
+      - i3.4xlarge
+      - i3.8xlarge
+    Default: m5.large
+    Description: App server instance type
+    Type: String
+  AWSInternalSecurityPolicy:
+    Default: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+    Type: String
+Mappings:
+  Constants:
+    ManagedPolicyIds:
+      CachingDisabled: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+      AllViewer: 216adef6-5c7f-47e4-b989-5492eafa07d3
+  AWSRegion2AMI:
+    ap-northeast-1:
+      HVM86: ami-0ca38c7440de1749a
+    ap-northeast-2:
+      HVM86: ami-0f2c95e9fe3f8f80e
+    ap-southeast-1:
+      HVM86: ami-02f26adf094f51167
+    ap-southeast-2:
+      HVM86: ami-0186908e2fdeea8f3
+    eu-central-1:
+      HVM86: ami-043097594a7df80ec
+    sa-east-1:
+      HVM86: ami-05373777d08895384
+    us-east-1:
+      HVM86: ami-0d5eff06f840b45e9
+    us-east-2:
+      HVM86: ami-077e31c4939f6a2f3
+    us-west-1:
+      HVM86: ami-04468e03c37242e1e
+    us-west-2:
+      HVM86: ami-0cf6f5c8a62fa5da6
+Resources:
+  AppMainLogGroup:
+    Type: AWS::Logs::LogGroup
+  AppIamInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Ref AWSInternalSecurityPolicy
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${AppMainLogGroup}:*
+          - Effect: Allow
+            Action: 's3:*'
+            Resource: '*'
+          - Effect: Allow
+            Action: 'elasticloadbalancing:Describe*'
+            Resource: '*'
+          - Effect: Allow
+            Action: 'ec2:Describe*'
+            Resource: '*'
+        PolicyName: App-Instance-Role
+  AppIamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref AppIamInstanceRole
+  App1InstanceWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  App1InstanceWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: App1Instance
+    Properties:
+      Handle: !Ref App1InstanceWaitHandle
+      Timeout: '6000'
+  App1Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      Comment: Install a App on aws
+      AWS::CloudFormation::Init:
+        config:
+          awscli:
+            commands:
+              00_set_default_s3_signature_version:
+                command: aws configure set default.s3.signature_version s3v4
+              01_set_default_region:
+                command: !Sub "aws configure set default.region '${AWS::Region}'"
+          packages:
+            yum:
+              awslogs: []
+          files:
+            /etc/awslogs/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file= /var/log/agent-state
+                [/home/ec2-user/misc/install]
+                file = /var/log/cloud-init-output.log
+                log_group_name = ${AppMainLogGroup}
+                log_stream_name = {instance_id}/App/install.log
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/awslogs/awscli.conf:
+              content: !Sub |
+                [plugins]
+                cwlogs = cwlogs
+                [default]
+                region = ${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /tmp/params.txt:
+              content:
+                !Sub |
+                  DBMasterUserPassword|${DBMasterUserPassword}
+                  DBMasterUsername|${DBMasterUsername}
+                  MySQLEndpoint|${MySQLEndpoint}
+                  RedisEndpoint|${RedisEndpoint}
+                  BucketName|${BucketName}
+              mode: '000440'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/cfn/cfn-hup.conf
+                - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+              awslogs:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/awslogs/awslogs.conf
+                packages:
+                  yum:
+                  - awslogs
+    Properties:
+      KeyName: !Ref KeyPairName
+      IamInstanceProfile: !Ref AppIamInstanceProfile
+      ImageId: !FindInMap [AWSRegion2AMI, !Ref 'AWS::Region', HVM86]
+      InstanceType: !Ref APPServerInstanceType
+      SubnetId: !Ref PrivateSubnet1ID
+      SecurityGroupIds:
+      - !Ref APPServerSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: !Ref 'APPEBSSize'
+            VolumeType: !Ref 'APPEBSType'
+      UserData:
+        !Base64
+          Fn::Sub: |
+            #!/bin/bash
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource App1Instance  --region ${AWS::Region}
+            curl -o install-app.sh https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/install-app.sh
+            chmod a+x install-app.sh
+            ./install-app.sh
+            /opt/aws/bin/cfn-signal -e $? -d "`cat /home/ec2-user/outputurl`" -r "Build Process Complete" '${App1InstanceWaitHandle}'
+      Tags:
+      - Key: Name
+        Value: Graviton_GameDay_App1
+
+  # AppALBLoadBalancer:
+  #   Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+  #   Properties:
+  #     Name: java-app-lb
+  #     SecurityGroups:
+  #       - Ref: APPServerSecurityGroup
+  #     Subnets:
+  #       - !Ref PrivateSubnet1ID
+  #       - !Ref PrivateSubnet2ID
+
+  # # Listeners for app load balancer
+  # AppALBListener:
+  #   Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  #   Properties:
+  #     #  Certificates:
+  #       #- Certificate
+  #     DefaultActions:
+  #       - Type: forward
+  #         TargetGroupArn: !Ref AppALBTargetGroup
+  #     LoadBalancerArn: !Ref AppALBLoadBalancer
+  #     Port: '8080'
+  #     Protocol: HTTP
+
+  # # Application load balancer target group
+  # AppALBTargetGroup:
+  #   DependsOn: App1Instance
+  #   Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  #   Properties:
+  #     Name: java-app-tg
+  #     HealthCheckPath: /
+  #     HealthCheckIntervalSeconds: 15
+  #     HealthCheckTimeoutSeconds: 3
+  #     HealthyThresholdCount: 2
+  #     Port: 8080
+  #     Protocol: HTTP
+  #     # A short drain time helps speed up the lab
+  #     Targets: 
+  #       - Id: !Ref App1Instance
+  #     TargetGroupAttributes:
+  #       - Key: deregistration_delay.timeout_seconds
+  #         Value: 10
+  #     UnhealthyThresholdCount: 3
+  #     VpcId: !Ref VPCID
+
+  #Web server
+
+  WebMainLogGroup:
+    Type: AWS::Logs::LogGroup
+  WebIamInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Ref AWSInternalSecurityPolicy
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${WebMainLogGroup}:*
+          - Effect: Allow
+            Action: 'ec2:Describe*'
+            Resource: '*'
+          - Effect: Allow
+            Action: 'elasticloadbalancing:Describe*'
+            Resource: '*'
+        PolicyName: Web-Instance-Role
+  WebIamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref WebIamInstanceRole
+  Web1InstanceWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  Web1InstanceWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: Web1Instance
+    Properties:
+      Handle: !Ref Web1InstanceWaitHandle
+      Timeout: '6000'
+  Web1Instance:
+    DependsOn: App1Instance
+    Type: AWS::EC2::Instance
+    Metadata:
+      Comment: Install a Web on aws
+      AWS::CloudFormation::Init:
+        config:
+          awscli:
+            commands:
+              00_set_default_s3_signature_version:
+                command: aws configure set default.s3.signature_version s3v4
+              01_set_default_region:
+                command: !Sub "aws configure set default.region '${AWS::Region}'"
+          packages:
+            yum:
+              awslogs: []
+          files:
+            /etc/awslogs/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file= /var/log/agent-state
+                [/home/ec2-user/misc/install]
+                file = /var/log/cloud-init-output.log
+                log_group_name = ${WebMainLogGroup}
+                log_stream_name = {instance_id}/Web/install.log
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/awslogs/awscli.conf:
+              content: !Sub |
+                [plugins]
+                cwlogs = cwlogs
+                [default]
+                region = ${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+              mode: '000400'
+              owner: root
+              group: root
+            /tmp/params.txt:
+              content:
+                !Sub |
+                  BucketName|${BucketName}
+              mode: '000440'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/cfn/cfn-hup.conf
+                - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+              awslogs:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/awslogs/awslogs.conf
+                packages:
+                  yum:
+                  - awslogs
+    Properties:
+      KeyName: !Ref KeyPairName
+      IamInstanceProfile: !Ref WebIamInstanceProfile
+      ImageId: !FindInMap [AWSRegion2AMI, !Ref 'AWS::Region', HVM86]
+      InstanceType: !Ref WebServerInstanceType
+      SubnetId: !Ref PublicSubnet1ID
+      SecurityGroupIds:
+      - !Ref WebServerSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: !Ref 'APPEBSSize'
+            VolumeType: !Ref 'APPEBSType'
+      UserData:
+        !Base64
+          Fn::Sub: |
+            #!/bin/bash
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Web1Instance  --region ${AWS::Region}
+            curl -o install-web.sh https://awspsa-quickstart.s3.cn-northwest-1.amazonaws.com.cn/gravitongameday/install-web.sh
+            chmod a+x install-web.sh
+            ./install-web.sh
+            /opt/aws/bin/cfn-signal -e $? -d "`cat /home/ec2-user/outputurl`" -r "Build Process Complete" '${Web1InstanceWaitHandle}'
+      Tags:
+      - Key: Name
+        Value: Graviton_GameDay_Web1
+
+
+ # cloudfront
+  PublicDistribution:
+    DependsOn: Web1Instance
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - CustomOriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: http-only
+            DomainName: !GetAtt 'Web1Instance.PublicDnsName' 
+            Id: gravitongameday
+        Enabled: 'true'
+        DefaultCacheBehavior:
+          TargetOriginId: gravitongameday
+          ViewerProtocolPolicy: allow-all
+          CachePolicyId: !FindInMap [Constants, ManagedPolicyIds, CachingDisabled]
+          OriginRequestPolicyId: !FindInMap [Constants, ManagedPolicyIds, AllViewer]
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - POST
+            - PATCH
+            - DELETE
+          CachedMethods: 
+            - GET
+            - HEAD
+            - OPTIONS
+        HttpVersion: http2
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: 'true'
+  # # User Pool Client
+  # CognitoUserPoolClient:
+  #   DependsOn: PublicDistribution
+  #   Type: 'AWS::Cognito::UserPoolClient'
+  #   Properties:
+  #     AllowedOAuthFlows:
+  #       - code
+  #       - implicit
+  #     AllowedOAuthFlowsUserPoolClient: true
+  #     AllowedOAuthScopes:
+  #       - openid
+  #     CallbackURLs:
+  #       - !Join ['', ['https://', !GetAtt 'PublicDistribution.DomainName', '/sample-webapp/j_security_check']]
+  #     ClientName: graviton-gameday
+  #     GenerateSecret: true
+  #     SupportedIdentityProviders:
+  #       - COGNITO
+  #     UserPoolId: !Ref UserPoolId
+  # # User Pool Domain
+  # CognitoUserPoolDomain:
+  #   Type: 'AWS::Cognito::UserPoolDomain'
+  #   Properties:
+  #     Domain: !Sub "${AWS::AccountId}-graviton"
+  #     UserPoolId: !Ref UserPoolId
+
+
+# Export stack output parameters 
+Outputs:
+  WebEndpoint:
+    Description: A reference to the Web DB instance endpoint
+    Value: !GetAtt Web1InstanceWaitCondition.Data
+
+  AppEndpoint:
+    Description: A reference to the App DB instance endpoint
+    Value: !GetAtt App1InstanceWaitCondition.Data
+  
+
+  CloudFrontDNS:
+    Description: The url of the cloudfront
+    Value: !Join ['', ['https://', !GetAtt 'PublicDistribution.DomainName','/sample-webapp/']]
+
+...
