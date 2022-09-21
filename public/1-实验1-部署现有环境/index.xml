@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>实验1 -- 部署现有环境 on AWS China Partner Workshop</title>
+    <link>/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83.html</link>
+    <description>Recent content in 实验1 -- 部署现有环境 on AWS China Partner Workshop</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Fri, 01 Nov 2019 16:13:49 -0700</lastBuildDate><atom:link href="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>

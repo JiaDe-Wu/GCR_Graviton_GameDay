@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en-US" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
+<html lang="cn" class="js csstransforms3d">
+<head>
+  <meta charset="utf-8">
+  <meta property="og:title" content="AWS China Partner Workshop" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="generator" content="Hugo 0.89.4" />
+  <meta name="description" content="AWS China Partner Workshop">
+<meta name="author" content="JiaDe Wu">
+
+  <link rel="shortcut icon" href="https://a0.awsstatic.com/libra-css/images/site/fav/favicon.ico" type="image/ico" />
+<link rel="icon" href="https://a0.awsstatic.com/libra-css/images/site/fav/favicon.ico" type="image/ico" />
+
+  <title>数据层迁移 :: AWS China Partner Workshop</title>
+
+  
+  <link href="../css/nucleus.css" rel="stylesheet">
+  <link href="../css/fontawesome-all.min.css" rel="stylesheet">
+  <link href="../css/hybrid.css" rel="stylesheet">
+  <link href="../css/featherlight.min.css" rel="stylesheet">
+  <link href="../css/perfect-scrollbar.min.css" rel="stylesheet">
+  <link href="../css/auto-complete.css" rel="stylesheet">
+  <link href="../css/atom-one-dark-reasonable.css" rel="stylesheet">
+  <link href="../css/theme.css" rel="stylesheet">
+  <link href="../css/hugo-theme.css" rel="stylesheet">
+  
+  <link href="../css/theme-aws.css" rel="stylesheet">
+  
+
+  <script src="../js/jquery-3.3.1.min.js"></script>
+
+  <style>
+    :root #header + #content > #left > #rlblock_left{
+        display:none !important;
+    }
+    
+      :not(pre) > code + span.copy-to-clipboard {
+          display: none;
+      }
+    
+  </style>
+  
+</head>
+
+<body class="" data-url="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration/1-%E6%8E%A5%E5%85%A5%E5%B1%82%E8%BF%81%E7%A7%BB.html">
+  <nav id="sidebar" class="">
+
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <div>
+    <a href="../" title="Go home">
+        <img style="vertical-align:middle" src="../images/logo.png" height="70px" />
+    </a>
+</div>
+
+    </div>
+    
+        <div class="searchbox">
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
+
+<script type="text/javascript" src="../js/lunr.min.js"></script>
+<script type="text/javascript" src="../js/auto-complete.js"></script>
+<script type="text/javascript">
+    
+        var baseurl = "";
+    
+</script>
+<script type="text/javascript" src="../js/search.js"></script>
+
+    
+  </div>
+
+    <div class="highlightable">
+    <ul class="topics">
+
+        
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/0_0-introduction.html" title="活动介绍" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../0_0-introduction.html">
+          活动介绍
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/0_1-agenda.html" title="Agenda" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../0_1-agenda.html">
+          Agenda
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83.html" title="实验1 -- 部署现有环境" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83.html">
+          <b></b>实验1 -- 部署现有环境
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+          
+        
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_1-%E5%8E%9F%E5%A7%8B%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D.html" title="原始系统架构介绍" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_1-%E5%8E%9F%E5%A7%8B%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D.html">
+          原始系统架构介绍
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_2-cloudformation%E9%83%A8%E7%BD%B2.html" title="CloudFormation部署" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_2-cloudformation%E9%83%A8%E7%BD%B2.html">
+          CloudFormation部署
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_3-%E5%8E%9F%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E6%B5%8B%E8%AF%95.html" title="原系统验证测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_3-%E5%8E%9F%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E6%B5%8B%E8%AF%95.html">
+          原系统验证测试
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/2-%E5%AE%9E%E9%AA%8C2-graviton-migration.html" title="实验2 -- Graviton Migration" class="dd-item 
+        parent
+        
+        
+        ">
+      <a href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration.html">
+          <b> </b>实验2 -- Graviton Migration
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+          
+        
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/2-%E5%AE%9E%E9%AA%8C2-graviton-migration/1-%E6%8E%A5%E5%85%A5%E5%B1%82%E8%BF%81%E7%A7%BB.html" title="数据层迁移" class="dd-item 
+        parent
+        active
+        
+        ">
+      <a href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration/1-%E6%8E%A5%E5%85%A5%E5%B1%82%E8%BF%81%E7%A7%BB.html">
+          <b></b>数据层迁移
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/2-%E5%AE%9E%E9%AA%8C2-graviton-migration/2-%E5%BA%94%E7%94%A8%E5%B1%82%E8%BF%81%E7%A7%BB.html" title="应用层迁移" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration/2-%E5%BA%94%E7%94%A8%E5%B1%82%E8%BF%81%E7%A7%BB.html">
+          <b></b>应用层迁移
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/2-%E5%AE%9E%E9%AA%8C2-graviton-migration/3-%E6%95%B0%E6%8D%AE%E5%B1%82%E8%BF%81%E7%A7%BB.html" title="WEB层迁移" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration/3-%E6%95%B0%E6%8D%AE%E5%B1%82%E8%BF%81%E7%A7%BB.html">
+          <b></b>WEB层迁移
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html" title="实验3 -- Graviton 性能测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html">
+          <b> </b>实验3 -- Graviton 性能测试
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+          
+        
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/1-java-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html" title="Java 性能测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/1-java-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html">
+          <b></b>Java 性能测试
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/2-redis-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html" title="Redis 性能测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/2-redis-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html">
+          <b></b>Redis 性能测试
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/3-mysql-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html" title="Mysql 性能测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/3-mysql-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html">
+          <b></b>Mysql 性能测试
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/4-graviton-%E7%B4%A0%E6%9D%90%E5%BA%93.html" title="Graviton 素材库" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../4-graviton-%E7%B4%A0%E6%9D%90%E5%BA%93.html">
+          <b></b>Graviton 素材库
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/5-%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93.html" title="课程总结" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../5-%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93.html">
+          <b></b>课程总结
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+         
+    </ul>
+
+    
+    
+
+    
+    <section id="footer">
+      <left>
+
+    <h5 class="copyright">&copy; 2020 Amazon Web Services, Inc. or its Affiliates. All rights reserved.<h5>
+
+</left>
+
+    </section>
+  </div>
+</nav>
+
+
+
+
+
+  <section id="body">
+    <div id="overlay"></div>
+    <div class="padding highlightable">
+      
+      <div>
+        <div id="top-bar">
+          
+          
+          
+          
+          <div id="top-github-link">
+            <a class="github-link" title='' href="https://code.amazon.com/packages/Aws-workshop-template/blobs/master/--/workshop/content/2-%e5%ae%9e%e9%aa%8c2%20--%20Graviton%20Migration/1-%e6%8e%a5%e5%85%a5%e5%b1%82%e8%bf%81%e7%a7%bb/_index.cn.md"
+              target="blank">
+              <i class="fas fa-code-branch"></i>
+              <span id="top-github-link-text"></span>
+            </a>
+          </div>
+          
+          
+          
+          <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+            <span id="sidebar-toggle-span">
+              <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                <i class="fa fa-bars"></i>
+              </a>
+            </span>
+            
+            <span id="toc-menu"><i class="fa fa-list-alt"></i></span>
+            
+            <span class="links">
+              
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href='../'>AWS合作伙伴动手训练营--GCR Graviton migration Game DAY </a> > <a href='../2-%E5%AE%9E%E9%AA%8C2-graviton-migration.html'>实验2 -- Graviton Migration</a> > 数据层迁移
+          
+          
+          
+          
+          
+          
+            </span>
+          </div>
+          
+          <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#数据层迁移场景">数据层迁移场景</a></li>
+      </ul>
+    </li>
+    <li><a href="#mysql-迁移">Mysql 迁移</a></li>
+    <li><a href="#redis-迁移">Redis 迁移</a>
+      <ul>
+        <li><a href="#1-数据库迁移前准备以redis-和-mysql-为例的实验手册">1. 数据库迁移前准备，以Redis 和 Mysql 为例的实验手册</a></li>
+      </ul>
+    </li>
+    <li><a href="#11-登录实验账号确认实验环境">1.1 登录实验账号，确认实验环境</a></li>
+    <li><a href="#12-检查实验环境中的数据库实例">1.2 检查实验环境中的数据库实例</a></li>
+    <li><a href="#13-准备登录实例">1.3 准备登录实例</a></li>
+    <li><a href="#2-arm架构的数据库部署">2 ARM架构的数据库部署</a></li>
+    <li><a href="#21-部署mysql的graviton实例导航到ec2控制台">2.1 部署Mysql的Graviton实例，导航到EC2控制台</a></li>
+    <li><a href="#22-部署redis的graviton实例导航到ec2控制台">2.2 部署Redis的Graviton实例，导航到EC2控制台</a></li>
+    <li><a href="#3数据的迁移实施">3数据的迁移实施</a></li>
+    <li><a href="#31-redis迁移">3.1 redis迁移</a></li>
+    <li><a href="#32-mysql迁移">3.2 mysql迁移</a>
+      <ul>
+        <li><a href="#数据库的测试和验证">数据库的测试和验证</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+          
+        </div>
+      </div>
+      
+
+      
+        <div id="body-inner">
+          <h1>数据层迁移</h1>
+          
+          
+
+
+
+	
+<div class="notices info" ><p>目标：通过本次数据库迁移实验，使学员掌握常见的关系型数据库mysql和非关系型数据库Redis的部署和迁移。</p>
+</div>
+
+<p>本次迁移主要包含redis和mysql两种类型数据库的实验，</p>
+<h3 id="数据层迁移场景">数据层迁移场景</h3>
+<p>小汪公司正在为如何降本增效，尤其是数据库层的计划评估方案，公司内部有多台Mysql数据库服务器，需要一个数据库的迁移ARM架构的评估和测试。小汪公司IT和业务部协商提供了一条测试的业务线做本次迁移评估。此业务线使用了Redis和Mysql，前端使用apache和Java架构的应用。</p>
+<p>Mysql迁移是最常见的数据库迁移场景，有大量的第三方和云原生工具，本次实验场景采用mysqldump命令进行迁移。</p>
+<p>Redis迁移是缓存常见的迁移场景，本次采用redis-shake工具进行迁移。</p>
+<h2 id="mysql-迁移">Mysql 迁移</h2>
+<p>本次Mysql迁移采用的是mydumper,myload进行备份还原， mydumper,myload是mysql的多线程导入导出工具</p>
+<p>迁移流程如下：
+<img src="../images/Mysql-02.png" alt=""></p>
+<p>1.通过mydumper工具把原X86数据库导出到X86本地磁盘，</p>
+<p>2.把备份文件上传到S3存储桶，</p>
+<p>3.把S3桶的数据库备份文件下载到Graviton迁移目标主机上</p>
+<p>4.通过myload对目标Graviton主机进行数据库还原覆盖操作</p>
+<h2 id="redis-迁移">Redis 迁移</h2>
+<p>redis迁移一般有redis-shake，主从复制PSYNC，RDB迁移、AOF迁移，Dump迁移等，本次实验使用redis-shake方式</p>
+<p>redis-shake介绍</p>
+<p><img src="../images/Redis-01.png" alt=""></p>
+<p>redis-shake就是一款非常好用的工具，可以支持备份、恢复、解析、同步等功能，主要的功能有：</p>
+<p>decode，对RDB文件进行读取，并以json格式存储</p>
+<p>restore，将RDB文件恢复到目的Redis服务器</p>
+<p>dump，将源Redis服务器的数据通过RDB文件的方式保存下来</p>
+<p>sync，支持源Redis和目的Redis的数据同步，通过模拟成Slave(使用psync)，支持全量和增量数据的同步，对单节点、主从、集群环境之间进行同步(2.8-5.0版本，codis环境)，也支持云上环境</p>
+<p>rump，使用scan和restore命令进行数据迁移，对不支持psync命令的环境可以使用这种方式，仅支持全量的数据迁移</p>
+<h3 id="1-数据库迁移前准备以redis-和-mysql-为例的实验手册">1. 数据库迁移前准备，以Redis 和 Mysql 为例的实验手册</h3>
+<h2 id="11-登录实验账号确认实验环境">1.1 登录实验账号，确认实验环境</h2>
+<p>请参考“登录实验环境账号—登录AWS EventEngine说明”</p>
+<h2 id="12-检查实验环境中的数据库实例">1.2 检查实验环境中的数据库实例</h2>
+<p><img src="../images/EC2-01.png" alt="">
+本次Mysql的账号为：</p>
+<pre><code>root
+</code></pre>
+<p>密码为：</p>
+<pre><code>password
+</code></pre>
+<p>查询并噁登陆本次源环境的Mysql</p>
+<p>使用入第三方的ssh工具如putty或者AWS SSM工具连接服务器。</p>
+<p>检查redis服务器
+<img src="../images/EC2-01.png" alt=""></p>
+<p>登录redis服务器，-h替换服务器IP，-a后替换redis密码</p>
+<pre><code>redis-cli -h host -p 6379 -a password
+</code></pre>
+<p>检查mysql服务器
+<img src="../images/EC2-01.png" alt=""></p>
+<p>登录数据库，请把-u后面替换数据库用户名，-p后面替换数据库密码 -h后面替换数据库服务器IP地址</p>
+<pre><code>mysql -uroot -ppassword -h 127.0.0.1 -P 3306
+</code></pre>
+<p>切换到当前数据库上</p>
+<pre><code>Use data;
+</code></pre>
+<p>查看库下表信息</p>
+<pre><code>show tables;
+</code></pre>
+<p>如图：todo</p>
+<p><img src="../images/EC2-01.png" alt=""></p>
+<p>退出数据库</p>
+<pre><code>quit
+</code></pre>
+<h2 id="13-准备登录实例">1.3 准备登录实例</h2>
+<p>方法1，使用putty等linux工具连接到EC2，
+打开putty，指定pem文件，服务器地址</p>
+<p>Amazon的EC2中，默认是不允许使用用户名和密码直接连接Instance的，而是通过AWS (Amazon Web Service)提供的证书。在第一次使用EC2的时候，AWS会要求你创建一个证书并下载，证书是一个.pem文件。</p>
+<p><img src="../images/putty-session-config-01.png" alt=""></p>
+<p>Host Name (主机名) 框中，输入 主机DNS或者公网IP地址</p>
+<p>Amazon Linux AMI，用户名称是 ec2-user</p>
+<p>端口： 22</p>
+<p>在 Category (类别) 窗格中，展开 Connection (连接)，再展开 SSH，然后选择 Auth (身份验证)。完成以下操作：</p>
+<p>单击 Browse (浏览)。</p>
+<p>选择您为密钥对生成的 .ppk 或 .pem 文件，然后单击 Open (打开)。</p>
+<p>如果这是您第一次连接到此实例，PuTTY 会显示安全警告对话框，询问您是否信任您要连接到的主机。请单击Yes</p>
+<hr>
+<p>方法2，使用AWS 的 SSM 工具链接
+点击， 确认你的EC2是否具有对应的ssm 角色</p>
+<p>在左侧的控制台导航菜单选择EC2 Dashboard（EC2控制面板）
+首先在控制台中上方搜索栏搜索 EC2，并从结果列表中选中此服务。然后选中对应的EC2，点击操作按钮，安全，编辑IAM角色。
+<img src="../images/ec2-lab-sessionmanager-08.png" alt="">
+如果已经有对应的SSM角色，则说明有SSM连接的权限。
+<img src="../images/EC2-lab-03.png" alt=""></p>
+<p>点击连接按钮，
+<img src="../images/ec2-lab-09.png" alt="">
+选择会话管理器session manager，点击连接，进入这台EC2的操作系统命令行界面
+<img src="../images/ec2-lab-sessionmanager-11.png" alt=""></p>
+<h2 id="2-arm架构的数据库部署">2 ARM架构的数据库部署</h2>
+<h2 id="21-部署mysql的graviton实例导航到ec2控制台">2.1 部署Mysql的Graviton实例，导航到EC2控制台</h2>
+<p>创建EC2，在左侧的控制台导航菜单选择EC2 Dashboard（EC2控制面板）</p>
+<p>首先在控制台中上方搜索栏搜索 EC2，并从结果列表中选中此服务。</p>
+<p>验证控制台右上角的Region（区域）是否与本次实验的Region值一致，然后从列表中选择 Launch instance（启动实例）下拉菜单，启动实例</p>
+<p>选择启动实例
+注意：架构处的下拉框请选中 64位（ARM），如下图
+<img src="../images/graviton-AMI.png" alt=""></p>
+<p>启动实例的参数如下：</p>
+<p>创建EC2如下：</p>
+<pre><code>名称： target Mysql
+实例类型：c6g.large
+Amazon Machine Image（AMI）： Amazon Linux 2 AMI（HVM）
+架构：64位（ARM）
+密钥对名称：自己的用户名
+VPC： lab
+安全组：lab
+存储：默认
+配置用户数据：
+
+
+角色：
+</code></pre>
+<p>最后点击启动实例按钮在，请在summary（汇总）核对下参数信息。
+启动完毕EC2后，可以悬着 View all instance（查看所有实例），等待实例的状态显示为Running（正在运行），这表示实例已完成启动。</p>
+<p><img src="../images/EC2-01.png" alt=""></p>
+<h2 id="22-部署redis的graviton实例导航到ec2控制台">2.2 部署Redis的Graviton实例，导航到EC2控制台</h2>
+<p>使用同样的方法创建一台Redis实例</p>
+<p>启动实例的参数如下：</p>
+<p>创建EC2如下：</p>
+<pre><code>名称： target redis
+实例类型：c6g.large
+Amazon Machine Image（AMI）： Amazon Linux 2 AMI（HVM）
+架构：64位（ARM）
+密钥对名称：自己的用户名
+VPC： lab
+安全组：lab
+存储：默认
+配置用户数据：
+
+
+角色：
+</code></pre>
+<h2 id="3数据的迁移实施">3数据的迁移实施</h2>
+<h2 id="31-redis迁移">3.1 redis迁移</h2>
+<p>redis-shake是一个常用的迁移工具，它提供了备份、恢复、解析、同步等功能。</p>
+<p>安装redis</p>
+<pre tabindex="0"><code>
+$ sudo yum install redis
+$ systemctl start redis
+
+</code></pre><p>安装redis-shake</p>
+<pre tabindex="0"><code>
+wget https://github.com/alibaba/RedisShake/releases/redis-shark-v2.0.2.tar.gz
+tar zxvf redis-shark-v2.0.2.tar.gz
+</code></pre><p>配置redis-shake</p>
+<p>启动redis-shake</p>
+<h2 id="32-mysql迁移">3.2 mysql迁移</h2>
+<p>首先登录目标gravition的主机，使用Putty或者SSM工具</p>
+<p>备份hellodb数据库到当前目录下</p>
+<pre tabindex="0"><code>
+$ mydumper -uuser -ppassword -B data -o ./
+
+</code></pre><p>使用复制功能，复制mysql数据文件</p>
+<p>首先创建一个bucket桶</p>
+<p>在左侧的控制台导航菜单选择S3 Dashboard（EC2控制面板）
+首先在控制台中上方搜索栏搜索 S3，并从结果列表中选中此服务。然后选中对应的S3，点击操作按钮
+点击创建桶
+<img src="../images/gid-s3-02.png" alt="">
+桶名请使用自己的组名+姓名的拼音命名。 最后点击创建
+<img src="../images/gid-s3-03.png" alt=""></p>
+<p>把文件上传到S3</p>
+<p>源端的mysql已经安装AWS CLI</p>
+<p>然后拷贝到目标服务器的对应目录</p>
+<p>使用AWS CLi命令</p>
+<pre><code>aws configure
+</code></pre>
+<p>填写AK，SK以及默认登录的地域等信息</p>
+<pre><code>    AWS Access Key ID [None]:
+    AWS Secret Access Key [None]:
+    Default region name [None]:
+    Default output format [None]:
+</code></pre>
+<p>登录源端服务器并复制存储桶的对象文件</p>
+<pre><code>    aws s3 cp ./mysql.bak s3://yourbucket/ 
+</code></pre>
+<p>登录目标端gravition服务器并下载S3的备份文件</p>
+<pre><code>    aws s3 cp s3://yourbucket/mysql.bak ./
+</code></pre>
+<p>然后还原并覆盖目标数据库</p>
+<pre><code>    myloader -uuser -ppassword -o -B data -o -d ./mysql.bak
+</code></pre>
+<h3 id="数据库的测试和验证">数据库的测试和验证</h3>
+<p>登录数据库，请把-u后面替换数据库用户名，-p后面替换数据库密码 -h后面替换数据库服务器IP地址</p>
+<pre><code>mysql -uroot -ppassword -h 127.0.0.1 -P 3306
+</code></pre>
+<p>切换到当前数据库上</p>
+<pre><code>Use data;
+</code></pre>
+<p>查看库下表信息是否与源库一致</p>
+<pre><code>show tables;
+</code></pre>
+<p>如图：todo
+<img src="../images/01add-database.png" alt=""></p>
+<h2 id="总结">总结</h2>
+<p>本次迁移完成了redis和mysql的数据迁移，验证。</p>
+<p>本次redis使用redis-shake工具进行迁移。Mysql迁移采用的是mydumper,myload进行备份还原。</p>
+<p>接下来开始准备应用迁移。</p>
+<p><img src="../images/01Superset-dashboard-overview.png" alt=""></p>
+
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
+        </div> 
+        
+
+      </div>
+
+    <div id="navigation">
+        
+        
+        
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+        
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration.html" title="实验2 -- Graviton Migration"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration/2-%E5%BA%94%E7%94%A8%E5%B1%82%E8%BF%81%E7%A7%BB.html" title="应用层迁移" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
+    </section>
+    
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="../js/clipboard.min.js"></script>
+    <script src="../js/perfect-scrollbar.min.js"></script>
+    <script src="../js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="../js/jquery.sticky.js"></script>
+    <script src="../js/featherlight.min.js"></script>
+    <script src="../js/html5shiv-printshiv.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="../js/modernizr.custom-3.6.0.js"></script>
+    <script src="../js/learn.js"></script>
+    <script src="../js/hugo-learn.js"></script>
+
+    <link href="../mermaid/mermaid.css" rel="stylesheet" />
+    <script src="../mermaid/mermaid.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    
+  </body>
+</html>

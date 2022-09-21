@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>/en/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="/fr/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/"
+                />
+  </url>
+  
+  <url>
+    <loc>/en/agenda.html</loc>
+    <lastmod>2019-10-30T17:50:15-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/en/login.html</loc>
+    <lastmod>2019-11-01T16:13:49-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/en/module1.html</loc>
+    <lastmod>2019-10-30T17:50:15-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/en/module2.html</loc>
+    <lastmod>2019-10-30T17:50:15-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/en/survey.html</loc>
+    <lastmod>2019-10-30T17:50:15-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/en/categories.html</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="/fr/categories.html"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/categories.html"
+                />
+  </url>
+  
+  <url>
+    <loc>/en/tags.html</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="/fr/tags.html"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/tags.html"
+                />
+  </url>
+  
+</urlset>

@@ -1,0 +1,57 @@
+[
+{
+	"uri": "/en/",
+	"title": "AWS IMMERSION DAY - Maximus",
+	"tags": [],
+	"description": "",
+	"content": "AWS Immersion Day is offered to selected customers to provide a deep hands-on experience on the tools and technologies that can address the customer requirements. It would involve presentations, workshops and Q\u0026A with the attendees to discuss and demonstrate the solution. "
+},
+{
+	"uri": "/en/agenda.html",
+	"title": "Agenda",
+	"tags": [],
+	"description": "",
+	"content": " Schedule for Nov 6th, 2019    Start Time (EST) Duration Training Type Title     09:30am 15 mins Presentation Introduction to AWS DevOps Immersion Day   09:45am 45 mins Presentation Current State of DevOps at Maximus   10:30am 15 mins Q\u0026amp;A Discussions and Q\u0026amp;A   10:45am 15 mins N/A BREAK   11:00am 30 mins Presentation DevOps @ Amazon.com   11:30am 30 mins Presentation Module1: Building CI/CD pipeline with AWS Fargate   12:00pm 1 hour Present / Demo LUNCH N LEARN   01:00pm 15 mins N/A BREAK   01:15pm 1 hour 15 mins LAB Module1: Building CI/CD pipeline with AWS Fargate   02:30pm 15 mins N/A BREAK   02:45pm 1 Hour 15 mins LAB Module2: Integration of Jenkins with CodeBuild and CodeDeploy (Jenkins, Github)   04:00pm 15 mins Presentation Closing   04:15pm 15 mins Survey Survey    "
+},
+{
+	"uri": "/en/login.html",
+	"title": "Workshop Login",
+	"tags": [],
+	"description": "",
+	"content": " Logging into AWS Console It is encouraged to work in a team of no more than 4 person with an ideal number of 2-3. The teams will be provided with Team-Hashes, with which the members can login into Event Engine.  Steps to follow:  Login URL: Click Here Enter the team hash and on next screen, enter a \"Cool\" Team Name The dashboard will now look like this, click on the \"AWS Console\" (circled) :  Copy-paste the credentials in your notepad for our workshop use. The example below shows \"us-east-2\" region, but please co-ordinate with the admin to note down the correct region. Click on Open Console highlighted to login into AWS account:  You would see the AWS Account as below now, you can now move to the workshop :  Now move on to the Module1 section and commence the workshop !! ENJOY !!  "
+},
+{
+	"uri": "/en/module1.html",
+	"title": "Module 1",
+	"tags": [],
+	"description": "",
+	"content": " Building CI/CD Pipeline with AWS Fargate This workshop provides an hands-on experience in instantiating a typical web hosting infrastructure that hosts applications being deployed from a CI/CD pipeline. The application is containerized and deployed on Serverless Infrastructure.  Please access this workshop at this link "
+},
+{
+	"uri": "/en/module2.html",
+	"title": "Module 2",
+	"tags": [],
+	"description": "",
+	"content": " Jenkins orchestration with AWS CodeBuild and CodeDeploy This workshop provides a hands-on experience in building a Jenkins orchestrated CI/CD pipeline with AWS CodeBuild and AWS CodeDeploy services to deploy a monolith application on a typical web-hosting EC2 infrastructure.  Please access this workshop at this link "
+},
+{
+	"uri": "/en/survey.html",
+	"title": "Survey",
+	"tags": [],
+	"description": "",
+	"content": "Please fill the survey at this link. Your feedback would be valuable. "
+},
+{
+	"uri": "/en/categories.html",
+	"title": "Categories",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/en/tags.html",
+	"title": "Tags",
+	"tags": [],
+	"description": "",
+	"content": ""
+}]

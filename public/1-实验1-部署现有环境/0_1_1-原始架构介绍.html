@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en-US" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
+<html lang="cn" class="js csstransforms3d">
+<head>
+  <meta charset="utf-8">
+  <meta property="og:title" content="AWS China Partner Workshop" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="generator" content="Hugo 0.89.4" />
+  <meta name="description" content="AWS China Partner Workshop">
+<meta name="author" content="JiaDe Wu">
+
+  <link rel="shortcut icon" href="https://a0.awsstatic.com/libra-css/images/site/fav/favicon.ico" type="image/ico" />
+<link rel="icon" href="https://a0.awsstatic.com/libra-css/images/site/fav/favicon.ico" type="image/ico" />
+
+  <title>原始系统架构介绍 :: AWS China Partner Workshop</title>
+
+  
+  <link href="../css/nucleus.css" rel="stylesheet">
+  <link href="../css/fontawesome-all.min.css" rel="stylesheet">
+  <link href="../css/hybrid.css" rel="stylesheet">
+  <link href="../css/featherlight.min.css" rel="stylesheet">
+  <link href="../css/perfect-scrollbar.min.css" rel="stylesheet">
+  <link href="../css/auto-complete.css" rel="stylesheet">
+  <link href="../css/atom-one-dark-reasonable.css" rel="stylesheet">
+  <link href="../css/theme.css" rel="stylesheet">
+  <link href="../css/hugo-theme.css" rel="stylesheet">
+  
+  <link href="../css/theme-aws.css" rel="stylesheet">
+  
+
+  <script src="../js/jquery-3.3.1.min.js"></script>
+
+  <style>
+    :root #header + #content > #left > #rlblock_left{
+        display:none !important;
+    }
+    
+      :not(pre) > code + span.copy-to-clipboard {
+          display: none;
+      }
+    
+  </style>
+  
+</head>
+
+<body class="" data-url="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_1-%E5%8E%9F%E5%A7%8B%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D.html">
+  <nav id="sidebar" class="">
+
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <div>
+    <a href="../" title="Go home">
+        <img style="vertical-align:middle" src="../images/logo.png" height="70px" />
+    </a>
+</div>
+
+    </div>
+    
+        <div class="searchbox">
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
+
+<script type="text/javascript" src="../js/lunr.min.js"></script>
+<script type="text/javascript" src="../js/auto-complete.js"></script>
+<script type="text/javascript">
+    
+        var baseurl = "";
+    
+</script>
+<script type="text/javascript" src="../js/search.js"></script>
+
+    
+  </div>
+
+    <div class="highlightable">
+    <ul class="topics">
+
+        
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/0_0-introduction.html" title="活动介绍" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../0_0-introduction.html">
+          活动介绍
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/0_1-agenda.html" title="Agenda" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../0_1-agenda.html">
+          Agenda
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83.html" title="实验1 -- 部署现有环境" class="dd-item 
+        parent
+        
+        
+        ">
+      <a href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83.html">
+          <b></b>实验1 -- 部署现有环境
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+          
+        
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_1-%E5%8E%9F%E5%A7%8B%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D.html" title="原始系统架构介绍" class="dd-item 
+        parent
+        active
+        
+        ">
+      <a href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_1-%E5%8E%9F%E5%A7%8B%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D.html">
+          原始系统架构介绍
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_2-cloudformation%E9%83%A8%E7%BD%B2.html" title="CloudFormation部署" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_2-cloudformation%E9%83%A8%E7%BD%B2.html">
+          CloudFormation部署
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_3-%E5%8E%9F%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E6%B5%8B%E8%AF%95.html" title="原系统验证测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_3-%E5%8E%9F%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E6%B5%8B%E8%AF%95.html">
+          原系统验证测试
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/2-%E5%AE%9E%E9%AA%8C2-graviton-migration.html" title="实验2 -- Graviton Migration" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration.html">
+          <b> </b>实验2 -- Graviton Migration
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+          
+        
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/2-%E5%AE%9E%E9%AA%8C2-graviton-migration/1-%E6%8E%A5%E5%85%A5%E5%B1%82%E8%BF%81%E7%A7%BB.html" title="数据层迁移" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration/1-%E6%8E%A5%E5%85%A5%E5%B1%82%E8%BF%81%E7%A7%BB.html">
+          <b></b>数据层迁移
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/2-%E5%AE%9E%E9%AA%8C2-graviton-migration/2-%E5%BA%94%E7%94%A8%E5%B1%82%E8%BF%81%E7%A7%BB.html" title="应用层迁移" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration/2-%E5%BA%94%E7%94%A8%E5%B1%82%E8%BF%81%E7%A7%BB.html">
+          <b></b>应用层迁移
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/2-%E5%AE%9E%E9%AA%8C2-graviton-migration/3-%E6%95%B0%E6%8D%AE%E5%B1%82%E8%BF%81%E7%A7%BB.html" title="WEB层迁移" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../2-%E5%AE%9E%E9%AA%8C2-graviton-migration/3-%E6%95%B0%E6%8D%AE%E5%B1%82%E8%BF%81%E7%A7%BB.html">
+          <b></b>WEB层迁移
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html" title="实验3 -- Graviton 性能测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html">
+          <b> </b>实验3 -- Graviton 性能测试
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+          
+        
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/1-java-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html" title="Java 性能测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/1-java-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html">
+          <b></b>Java 性能测试
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/2-redis-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html" title="Redis 性能测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/2-redis-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html">
+          <b></b>Redis 性能测试
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+ 
+  
+    
+    <li data-nav-id="/3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/3-mysql-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html" title="Mysql 性能测试" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../3-%E5%AE%9E%E9%AA%8C3-graviton-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/3-mysql-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95.html">
+          <b></b>Mysql 性能测试
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/4-graviton-%E7%B4%A0%E6%9D%90%E5%BA%93.html" title="Graviton 素材库" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../4-graviton-%E7%B4%A0%E6%9D%90%E5%BA%93.html">
+          <b></b>Graviton 素材库
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+ 
+  
+    
+    <li data-nav-id="/5-%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93.html" title="课程总结" class="dd-item 
+        
+        
+        
+        ">
+      <a href="../5-%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93.html">
+          <b></b>课程总结
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+         
+    </ul>
+
+    
+    
+
+    
+    <section id="footer">
+      <left>
+
+    <h5 class="copyright">&copy; 2020 Amazon Web Services, Inc. or its Affiliates. All rights reserved.<h5>
+
+</left>
+
+    </section>
+  </div>
+</nav>
+
+
+
+
+
+  <section id="body">
+    <div id="overlay"></div>
+    <div class="padding highlightable">
+      
+      <div>
+        <div id="top-bar">
+          
+          
+          
+          
+          <div id="top-github-link">
+            <a class="github-link" title='' href="https://code.amazon.com/packages/Aws-workshop-template/blobs/master/--/workshop/content/1-%e5%ae%9e%e9%aa%8c1%20--%20%e9%83%a8%e7%bd%b2%e7%8e%b0%e6%9c%89%e7%8e%af%e5%a2%83/0_1_1-%e5%8e%9f%e5%a7%8b%e6%9e%b6%e6%9e%84%e4%bb%8b%e7%bb%8d/_index.cn.md"
+              target="blank">
+              <i class="fas fa-code-branch"></i>
+              <span id="top-github-link-text"></span>
+            </a>
+          </div>
+          
+          
+          
+          <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+            <span id="sidebar-toggle-span">
+              <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                <i class="fa fa-bars"></i>
+              </a>
+            </span>
+            
+            <span id="toc-menu"><i class="fa fa-list-alt"></i></span>
+            
+            <span class="links">
+              
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href='../'>AWS合作伙伴动手训练营--GCR Graviton migration Game DAY </a> > <a href='../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83.html'>实验1 -- 部署现有环境</a> > 原始系统架构介绍
+          
+          
+          
+          
+          
+          
+            </span>
+          </div>
+          
+          <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+          
+        </div>
+      </div>
+      
+
+      
+        <div id="body-inner">
+          <h1>原始系统架构介绍</h1>
+          
+          
+
+
+
+	<p><em><strong>使用 CloudFormation 部署 Graviton Game Day 架构</strong></em></p>
+<ul>
+<li>
+<p>本实验中，我们将通过CloudFormation部署Graviton-GameDay原架构，部署完成后您将得到一个X86环境下典型的3层架构。您将基于此环境进行后续的GameDay实验，并赢得知识成就和比赛得分。</p>
+</li>
+<li>
+<p>CloudFormation将为您快速部署下图的GameDay原始环境</p>
+</li>
+</ul>
+<p><img src="../images/gamedayaws.png" alt=""></p>
+<h4 id="资源清单">资源清单</h4>
+<p>我们将使用CloudFormation模板配置以下资源：</p>
+<ol>
+<li>新建VPC，包含两个公有子网、两个私有子网，Internet网关和安全组以对外提供服务并支持安全访问控制。</li>
+<li>一台堡垒机EC2实例，创建将被放置在公有子网，是整套环境ssh的唯一入口对下游组件它将向架构前后端进行配置管理，对公网您可以配置只有您的本地IP地址可以与之通讯</li>
+<li>一台EC2用于部署Apache Web服务器<code>Apache HTTP Server (&quot;httpd&quot;) </code>,放置在公有子网，他在公网上提供Tomcat的Web服务(使用了apache-tomcat-9.0.41转发应用服务器请求)</li>
+<li>一台EC2用于部署由Java 编写的 Tomcat <code>Apache Tomcat®</code> 应用程序,这是一个联系人管理系统的示例应用。他被放置在私有子网。</li>
+<li>一台EC2用于部署 Redis，该 Redis 与 Tomcat 缓存集成，用于保持用户的登录状态（使用了 Redisson Session Manager for Tomcat），他被放置在私有子网。</li>
+<li>一台EC2用于部署 MySQL，该 MySQL 与 Tomcat 数据库集成，可操作数据库的增删改查，他被放置在私有子网。</li>
+<li>部署AWS CloudFront 以Web服务器为源<code>Apache HTTP Server (&quot;httpd&quot;) </code>,他提供动态加速，并提供了证书、迁移割接的便利性。</li>
+<li>新建安全组，包括 堡垒机/Web/App/DB 4个安全组，用户整套环境的最小访问权限控制。</li>
+<li>Amazon S3存储桶，用于保存整套环境的<code>源码和配置文件</code>。</li>
+<li>IAM角色，堡垒机/Apache/Tomcat/Redis/MySQL.5个role用于管理整套环境服务权限</li>
+<li>您通过多达20种参数的自定义在集群创建之初即完成优化配置，这些参数都有默认值，是我们游戏日推荐的迁移和测试配置。（您可以在CloudFormation参数页面自定义配置参数）</li>
+<li>为方便内部测试，模板将为您的每台实例自动加载<code>AmazonSSMManagedInstanceCore</code>权限以满足PVRE合规要求，请放心食用</li>
+</ol>
+
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
+        </div> 
+        
+
+      </div>
+
+    <div id="navigation">
+        
+        
+        
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+        
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83.html" title="实验1 -- 部署现有环境"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="../1-%E5%AE%9E%E9%AA%8C1-%E9%83%A8%E7%BD%B2%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83/0_1_2-cloudformation%E9%83%A8%E7%BD%B2.html" title="CloudFormation部署" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
+    </section>
+    
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="../js/clipboard.min.js"></script>
+    <script src="../js/perfect-scrollbar.min.js"></script>
+    <script src="../js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="../js/jquery.sticky.js"></script>
+    <script src="../js/featherlight.min.js"></script>
+    <script src="../js/html5shiv-printshiv.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="../js/modernizr.custom-3.6.0.js"></script>
+    <script src="../js/learn.js"></script>
+    <script src="../js/hugo-learn.js"></script>
+
+    <link href="../mermaid/mermaid.css" rel="stylesheet" />
+    <script src="../mermaid/mermaid.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    
+  </body>
+</html>
